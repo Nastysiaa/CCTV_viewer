@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Cam Viewer — Full & List Modes</title>
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+    <style>
+      :root {
+        --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono",
+          "Courier New", monospace;
+        --hairline: 0.5px;
+        --sidew: 280px; /* фіксована видима ширина правої колонки */
+        --gap: 16px;
+        /* --card-padding: 16px; */
+        --card-border: var(--hairline);
+        --topbar-height: 42px;
+        --card-margin: 24px;
+      }
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        padding: 0;
+        width: 100vw;
+        height: 100vh;
+        overflow: hidden;
+        background: #000;
+        color: #fff;
+        font-family: var(--mono);
+        font-weight: 400;
+        letter-spacing: 0.2px;
+      }
+
+      .wrap {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: stretch;
+        padding: var(--card-margin);
+      }
+      .card {
+        width: 100%;
+        height: 100%;
+        border: var(--card-border) solid rgba(255, 255, 255, 0.95);
+        border-radius: 0;
+        background: #0a0a0a;
+        padding: 0;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        display: flex;
+        flex-direction: column;
+      }
+
+      /* Ensure both full and list views have the same margins */
+      .layout.full .card,
+      .layout.list .card {
+        margin: 0;
+      }
+
+      .topbar {
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
+        gap: 12px;
+        height: var(--topbar-height);
+        min-height: var(--topbar-height);
+        flex-shrink: 0;
+      }
+      .viewtoggle {
+        border: var(--hairline) solid rgba(255, 255, 255);
+        background: #111;
+        color: #fff;
+        padding: 6px 6px;
+        border-radius: 0;
+        cursor: pointer;
+        font-family: var(--mono);
+        font-weight: 400;
+        transition: background-color 0.12s linear, color 0.12s linear,
+          border-color 0.12s linear;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-width: var(--topbar-height);
+        min-height: var(--topbar-height);
+      }
+      .viewtoggle:hover,
+      .viewtoggle:focus-visible {
+        background: #fff;
+        color: #000;
+        border-color: #000;
+      }
+      .viewtoggle-icon {
+        font-size: 18px;
+        line-height: 1;
+        display: inline-block;
+        transition: transform 0.2s ease;
+      }
+      .viewtoggle-icon img {
+        width: 18px;
+        height: 18px;
+        display: block;
+        filter: invert(1); /* invert colors for dark background */
+        transition: filter 0.12s linear;
+      }
+      .viewtoggle:hover .viewtoggle-icon img,
+      .viewtoggle:focus-visible .viewtoggle-icon img {
+        filter: invert(0); /* remove inversion on hover (white bg) */
+      }
+
+      .grid {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        min-height: 0;
+        overflow: hidden;
+      }
+      .main {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        min-height: 0;
+        overflow: hidden;
+      }
+      .player {
+        position: relative;
+        flex: 1;
+        border: var(--hairline) solid rgba(255, 255, 255, 0.95);
+        border-radius: 0;
+        background: #000;
+        overflow: hidden;
+        min-height: 0;
+        display: flex;
+        align-items: stretch;
+        justify-content: stretch;
+      }
+      .player-content {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 0;
+      }
+      .player-content video,
+      .player-content img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        display: block;
+        filter: grayscale(100%);
+      }
+
+      .badge {
+        position: absolute;
+        top: 8.25px;
+        padding: 4px 8px;
+        background: rgba(0, 0, 0, 0.65);
+        color: #fff;
+        border: var(--hairline) solid rgba(255, 255, 255, 0.95);
+        border-radius: 0;
+        font-family: var(--mono);
+        font-size: 14px;
+        letter-spacing: 0.3px;
+        pointer-events: none;
+        user-select: none;
+      }
+      .timestamp {
+        right: 10px;
+      }
+      .loc-inframe {
+        left: 10px;
+      }
+
+      .err {
+        text-align: center;
+        font-size: 0.9rem;
+        color: #ffb4b4;
+        padding: 8px 0;
+        flex-shrink: 0;
+      }
+
+      /* режими */
+      .layout.full .grid {
+        flex-direction: column;
+      }
+      .layout.full .sidebar {
+        display: none;
+      }
+      .layout.full .main {
+        width: 100%;
+      }
+
+      .layout.list .grid {
+        flex-direction: row;
+        gap: var(--gap);
+        align-items: stretch;
+      }
+      .layout.list .main {
+        flex: 1;
+        min-width: 0;
+        display: flex;
+        flex-direction: column;
+      }
+      .layout.list .sidebar {
+        display: flex;
+        flex-direction: column;
+        width: var(--sidew);
+        flex-shrink: 0;
+        flex-grow: 0;
+        min-height: 0;
+        align-self: stretch;
+      }
+
+      /* Location badge displayed in player frame (left side, mirroring timestamp) */
+      .loc-inframe {
+        display: block;
+      }
+
+      /* список камер */
+      .sidebar {
+        border: var(--hairline) solid rgba(255, 255, 255, 0.95);
+        border-radius: 0;
+        padding: 0;
+        min-height: 0;
+        overflow: auto;
+        display: flex;
+        flex-direction: column;
+        --sbw: 12px;
+      }
+      .sidebar .list {
+        flex: 1;
+        min-height: 0;
+      }
+      .sidebar::-webkit-scrollbar {
+        width: var(--sbw);
+      }
+      .sidebar::-webkit-scrollbar-track {
+        background: transparent;
+        border-left: var(--hairline) solid rgba(255, 255, 255, 0.95);
+      }
+      .sidebar::-webkit-scrollbar-thumb {
+        background: #fff;
+        border: var(--hairline) solid #000;
+      }
+      .sidebar {
+        scrollbar-width: thin;
+        scrollbar-color: #fff transparent;
+      }
+
+      .list {
+        gap: 0;
+        margin: 0;
+        padding: 0;
+      }
+      .cam-item {
+        display: flex;
+        align-items: center;
+        justify-content: center; /* ЦЕНТР ТЕКСТУ */
+        border: var(--hairline) solid rgba(255, 255, 255, 0.95);
+        padding: 0 12px;
+        height: var(--topbar-height); /* однакова висота */
+        border-radius: 0;
+        cursor: pointer;
+        list-style: none;
+        transition: background-color 0.12s linear, color 0.12s linear,
+          border-color 0.12s linear;
+        user-select: none;
+        font-family: var(--mono);
+        font-size: 18px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        text-align: center;
+      }
+      /* .cam-item:first-child{ height:var(--topbar-height); } */
+      .cam-item:hover {
+        background: #fff;
+        color: #000;
+        border-color: #000;
+      }
+      .cam-item.active {
+        background: #fff;
+        color: #000;
+        border-color: #000;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <div class="card layout full" id="layout">
+        <div class="topbar">
+          <button id="toggleView" class="viewtoggle" title="Press M to toggle">
+            <span id="toggleIcon" class="viewtoggle-icon">☰</span>
+          </button>
+        </div>
+
+        <div class="grid">
+          <div class="main">
+            <div id="player" class="player" aria-live="polite">
+              <div
+                id="playerContent"
+                class="player-content"
+                style="padding-top: var(--topbar-height)"
+              ></div>
+              <div id="timestamp" class="badge timestamp">—</div>
+              <div id="locBadge" class="badge loc-inframe">—</div>
+            </div>
+            <div id="err" class="err" hidden></div>
+          </div>
+
+          <aside class="sidebar" id="sidebar" aria-label="Cameras list">
+            <div id="camList" class="list" role="list"></div>
+          </aside>
+        </div>
+        <div class="topbar"></div>
+      </div>
+    </div>
+
+    <script>
+      /* ==== cameras ( cam_01 disabled; cam_17..cam_21 disabled ) ==== */
+      const camerasRaw = [
+        {
+          title: "Paris, France",
+          url: "http://82.127.159.97:8083/jpgmulreq/1/image.jpg?key=1516975535684&lq=1&COUNTER",
+        },
+        {
+          title: "Renesse, Netherlands",
+          url: "http://217.63.79.153:8081/cgi-bin/faststream.jpg?stream=half&fps=15&rand=COUNTER",
+        },
+        {
+          title: "Saint-Denis, France",
+          url: "http://90.63.236.235:8080/SnapshotJPEG?Resolution=640x480&Quality=Clarity&COUNTER",
+        },
+        {
+          title: "Pantin, France",
+          url: "http://185.194.123.84:8001/mjpg/video.mjpg",
+        },
+        {
+          title: "Gent, Belgium",
+          url: "http://81.82.251.41:8082/cgi-bin/viewer/video.jpg?r=COUNTER",
+        },
+        {
+          title: "Champs-sur-Marne, France",
+          url: "http://81.67.25.88:8080/cgi-bin/faststream.jpg?stream=half&fps=15&rand=COUNTER",
+        },
+        {
+          title: "Verona, Italy",
+          url: "http://46.141.92.2:81/mjpg/video.mjpg",
+        },
+        {
+          title: "Warsaw, Poland",
+          url: "http://31.0.110.56:8081/webcapture.jpg?command=snap&channel=1?COUNTER",
+        },
+        {
+          title: "Czestochowa, Poland",
+          url: "http://85.202.156.79:80/mjpg/video.mjpg",
+        },
+        {
+          title: "Warsaw, Poland",
+          url: "http://81.15.242.108:80/mjpg/video.mjpg",
+        },
+        {
+          title: "Jaworzno, Poland",
+          url: "http://94.246.155.111:8080/snap.jpg?JpegSize=M&JpegCam=1&r=COUNTER",
+        },
+        {
+          title: "Busto Arsizio, Italy",
+          url: "http://84.33.89.170:85/jpgmulreq/1/image.jpg?key=1516975535684&lq=1&COUNTER",
+        },
+        {
+          title: "Viareggio, Italy",
+          url: "http://46.44.199.162:80/cgi-bin/faststream.jpg?stream=half&fps=15&rand=COUNTER",
+        },
+        {
+          title: "Ivrea, Italy",
+          url: "http://37.159.251.90:8080/cgi-bin/viewer/video.jpg?r=COUNTER",
+        },
+        {
+          title: "Torino, Italy",
+          url: "http://194.116.34.4:80/mjpg/video.mjpg",
+        },
+        {
+          title: "Novokuznetsk, Russia",
+          url: "http://46.181.60.194:8080/webcapture.jpg?command=snap&channel=1?COUNTER",
+        },
+        {
+          title: "Fryazino, Russia",
+          url: "http://193.9.244.207:8084/webcapture.jpg?command=snap&channel=1?COUNTER",
+        },
+        {
+          title: "Novosibirsk, Russia",
+          url: "http://5.129.141.86:8081/webcapture.jpg?command=snap&channel=1?COUNTER",
+        },
+        {
+          title: "Vatutinki, Russia",
+          url: "http://80.72.28.61:80/webcapture.jpg?command=snap&channel=1?COUNTER",
+        },
+        {
+          title: "Live camera Axis in Lausanne, Switzerland",
+          url: "http://213.202.40.157:80/mjpg/video.mjpg",
+          type: "mjpeg",
+        },
+        {
+          title: "Live camera Axis in Zurich, Switzerland",
+          url: "http://46.14.145.154:80/mjpg/video.mjpg",
+          type: "mjpeg",
+        },
+        {
+          title: "Live camera Axis in Zurich, Switzerland",
+          url: "http://83.150.56.16:83/mjpg/video.mjpg",
+          type: "mjpeg",
+        },
+        {
+          title: "Live camera Axis in Zurich, Switzerland",
+          url: "http://83.150.56.16:81/mjpg/video.mjpg",
+          type: "mjpeg",
+        },
+        {
+          title: "Live camera Axis in Zurich, Switzerland",
+          url: "http://83.150.56.16:82/mjpg/video.mjpg",
+          type: "mjpeg",
+        },
+        {
+          title: "Live camera Axis in Zurich, Switzerland",
+          url: "http://46.14.231.181:8888/mjpg/video.mjpg",
+          type: "mjpeg",
+        },
+        {
+          title: "Live camera Mobotix in Lausanne, Switzerland",
+          url: "http://46.14.203.136:8080/cgi-bin/faststream.jpg?stream=half&fps=15&rand=COUNTER",
+          type: "jpeg_poll",
+        },
+        {
+          title: "Live camera Mobotix in Bellinzona, Switzerland",
+          url: "http://217.11.41.46:80/cgi-bin/faststream.jpg?stream=half&fps=15&rand=COUNTER",
+          type: "jpeg_poll",
+        },
+        {
+          title: "Live camera Axis in Pully, Switzerland",
+          url: "http://212.147.38.3:80/mjpg/video.mjpg",
+          type: "mjpeg",
+        },
+        {
+          title: "Live camera Axis in Moutier, Switzerland",
+          url: "http://213.3.31.226:9003/mjpg/video.mjpg",
+          type: "mjpeg",
+        },
+        {
+          title: "Live camera Mobotix in Buchs, Switzerland",
+          url: "http://217.67.130.29:8080/cgi-bin/faststream.jpg?stream=half&fps=15&rand=COUNTER",
+          type: "jpeg_poll",
+        },
+        {
+          title: "Live camera Mobotix in La Chaux-de-Fonds, Switzerland",
+          url: "http://80.83.62.89:80/cgi-bin/faststream.jpg?stream=half&fps=15&rand=COUNTER",
+          type: "jpeg_poll",
+        },
+        {
+          title: "Live camera Axis in Lugano, Switzerland",
+          url: "http://213.200.230.69:80/mjpg/video.mjpg",
+          type: "mjpeg",
+        },
+        {
+          title: "Live camera Mobotix in Aesch, Switzerland",
+          url: "http://62.2.92.234:80/cgi-bin/faststream.jpg?stream=half&fps=15&rand=COUNTER",
+          type: "jpeg_poll",
+        },
+        {
+          title: "Live camera Mobotix in Neuchatel, Switzerland",
+          url: "http://213.193.106.62:8080/cgi-bin/faststream.jpg?stream=half&fps=15&rand=COUNTER",
+          type: "jpeg_poll",
+        },
+        {
+          title: "Live camera Mobotix in Turgi, Switzerland",
+          url: "http://81.221.120.131:82/cgi-bin/faststream.jpg?stream=half&fps=15&rand=COUNTER",
+          type: "jpeg_poll",
+        },
+        {
+          title: "Live camera Axis in Zurich, Switzerland",
+          url: "http://151.127.6.169:8081/mjpg/video.mjpg",
+          type: "mjpeg",
+        },
+        {
+          title: "Live camera Axis in Zurich, Switzerland",
+          url: "http://151.127.6.169:8082/mjpg/video.mjpg",
+          type: "mjpeg",
+        },
+        {
+          title: "Live camera Axis in Vevey, Switzerland",
+          url: "http://83.173.213.86:8081/mjpg/video.mjpg",
+          type: "mjpeg",
+        },
+        {
+          title: "Live camera in Bubikon, Switzerland",
+          url: "http://46.14.251.37:2000/oneshotimage1?COUNTER",
+          type: "mjpeg",
+        },
+        {
+          title: "Live camera in Zurich, Switzerland",
+          url: "http://213.144.145.239:8090/cam_1.cgi",
+          type: "mjpeg",
+        },
+        {
+          title: "Live camera in Chippis, Switzerland",
+          url: "http://213.221.146.11:8080/oneshotimage1?COUNTER",
+          type: "mjpeg",
+        },
+      ];
+
+      const disabledIdx = new Set([0, 16, 17, 18, 19, 20]); // cam_01 і cam_17..cam_21
+      const cameras = camerasRaw.filter((_, i) => !disabledIdx.has(i));
+
+      const els = {
+        layout: document.getElementById("layout"),
+        toggleView: document.getElementById("toggleView"),
+        toggleIcon: document.getElementById("toggleIcon"),
+        player: document.getElementById("player"),
+        playerContent: document.getElementById("playerContent"),
+        timestamp: document.getElementById("timestamp"),
+        locBadge: document.getElementById("locBadge"),
+        err: document.getElementById("err"),
+        sidebar: document.getElementById("sidebar"),
+        camList: document.getElementById("camList"),
+      };
+
+      let mode = localStorage.getItem("camMode") || "full";
+      let current = 0,
+        hls = null,
+        pollTimer = null;
+
+      function inferType(u) {
+        const url = (u || "").toLowerCase();
+        if (url.includes(".m3u8")) return "hls";
+        if (url.includes(".mp4")) return "mp4";
+        if (
+          url.includes("mjpg") ||
+          url.includes("faststream") ||
+          url.includes("multipart/x-mixed-replace")
+        )
+          return "mjpeg";
+        if (
+          /\.(jpg|jpeg|png)(\?|$)/.test(url) ||
+          url.includes("snapshot") ||
+          url.includes("jpgmulreq") ||
+          url.includes("viewer/video.jpg")
+        )
+          return "jpeg_poll";
+        return "mjpeg";
+      }
+      function showError(msg) {
+        els.err.hidden = !msg;
+        els.err.textContent = msg || "";
+      }
+      function cleanup() {
+        showError("");
+        if (pollTimer) {
+          clearInterval(pollTimer);
+          pollTimer = null;
+        }
+        if (hls) {
+          try {
+            hls.destroy();
+          } catch (_) {}
+          hls = null;
+        }
+        els.playerContent.innerHTML = "";
+      }
+      async function ensurePlay(v) {
+        try {
+          await v.play();
+        } catch (_) {}
+      }
+
+      const cityMap = { Париж: "Paris" };
+      const countryAliases = { "Russian Federation": "Russia" };
+      const clean = (s) => (s || "").trim();
+      const titleCase = (s) =>
+        s.replace(/\S+/g, (w) =>
+          w ? w[0].toUpperCase() + w.slice(1).toLowerCase() : w
+        );
+      function extractLocation(title) {
+        let t = title || "";
+        let m = t.match(/located in\s+([^,]+).*?,\s*([^,]+)\s*$/i);
+        if (m) {
+          let country = clean(m[1]),
+            city = clean(m[2]);
+          if (cityMap[city]) city = cityMap[city];
+          if (countryAliases[country]) country = countryAliases[country];
+          return `${country}, ${titleCase(city)}`;
+        }
+        m = t.match(/in\s+([^,]+),\s*([^,]+)\s*$/i);
+        if (m) {
+          let city = clean(m[1]),
+            country = clean(m[2]);
+          if (cityMap[city]) city = cityMap[city];
+          if (countryAliases[country]) country = countryAliases[country];
+          return `${country}, ${titleCase(city)}`;
+        }
+        m = t.match(/([^,]+),\s*([^,]+)\s*$/);
+        if (m) {
+          let city = clean(m[1]),
+            country = clean(m[2]);
+          if (cityMap[city]) city = cityMap[city];
+          if (countryAliases[country]) country = countryAliases[country];
+          return `${country}, ${titleCase(city)}`;
+        }
+        return t || "—";
+      }
+
+      function render(i) {
+        const cam = cameras[i];
+        if (!cam) return;
+        cleanup();
+
+        const type = inferType(cam.url);
+        const loc = extractLocation(cam.title || "");
+        els.locBadge.textContent = loc; // inside frame (left side, mirroring timestamp)
+
+        if (type === "hls") {
+          const v = document.createElement("video");
+          v.controls = true;
+          v.muted = true;
+          v.playsInline = true;
+          v.autoplay = true;
+          els.playerContent.appendChild(v);
+          if (Hls.isSupported()) {
+            hls = new Hls({ enableWorker: true });
+            hls.loadSource(cam.url);
+            hls.attachMedia(v);
+            hls.on(Hls.Events.MANIFEST_PARSED, () => ensurePlay(v));
+            hls.on(Hls.Events.ERROR, () => showError("Stream error (HLS)."));
+          } else if (v.canPlayType("application/vnd.apple.mpegurl")) {
+            v.src = cam.url;
+            v.addEventListener("loadedmetadata", () => ensurePlay(v));
+          } else {
+            showError("HLS not supported in this browser.");
+          }
+        } else if (type === "mp4") {
+          const v = document.createElement("video");
+          v.src = cam.url;
+          v.controls = true;
+          v.muted = true;
+          v.playsInline = true;
+          v.autoplay = true;
+          els.playerContent.appendChild(v);
+          v.addEventListener("error", () => showError("Could not play MP4."));
+          ensurePlay(v);
+        } else if (type === "jpeg_poll") {
+          const img = document.createElement("img");
+          const base = cam.url;
+          const refresh = 1000;
+          const tick = () => {
+            img.src =
+              base + (base.includes("?") ? "&" : "?") + "t=" + Date.now();
+          };
+          els.playerContent.appendChild(img);
+          img.addEventListener("error", () =>
+            showError("Snapshot not reachable.")
+          );
+          tick();
+          pollTimer = setInterval(tick, refresh);
+        } else {
+          const img = document.createElement("img");
+          img.src = cam.url;
+          img.alt = "MJPEG";
+          img.addEventListener("error", () => {
+            showError("MJPEG failed — trying snapshot mode…");
+            cleanup();
+            const guess = cam.url.replace(
+              /faststream\.jpg.*$/i,
+              "axis-cgi/jpg/image.cgi"
+            );
+            cameras[i] = { title: cam.title, url: guess };
+            render(i);
+          });
+          els.playerContent.appendChild(img);
+        }
+
+        document.querySelectorAll(".cam-item").forEach((el, idx) => {
+          el.classList.toggle("active", idx === current);
+        });
+      }
+
+      function buildList() {
+        els.camList.innerHTML = "";
+        cameras.forEach((_, idx) => {
+          const li = document.createElement("div");
+          li.className = "cam-item";
+          li.setAttribute("role", "listitem");
+          li.textContent = `cam_${String(idx + 1).padStart(2, "0")}`;
+          li.addEventListener("click", () => {
+            current = idx;
+            render(current);
+          });
+          els.camList.appendChild(li);
+        });
+      }
+
+      const next = () => {
+        current = (current + 1) % cameras.length;
+        render(current);
+      };
+      const prev = () => {
+        current = (current - 1 + cameras.length) % cameras.length;
+        render(current);
+      };
+      function toggleFullscreen() {
+        if (
+          !document.fullscreenElement &&
+          !document.webkitFullscreenElement &&
+          !document.mozFullScreenElement &&
+          !document.msFullscreenElement
+        ) {
+          // Enter fullscreen
+          const elem = document.documentElement;
+          if (elem.requestFullscreen) {
+            elem.requestFullscreen();
+          } else if (elem.webkitRequestFullscreen) {
+            elem.webkitRequestFullscreen();
+          } else if (elem.mozRequestFullScreen) {
+            elem.mozRequestFullScreen();
+          } else if (elem.msRequestFullscreen) {
+            elem.msRequestFullscreen();
+          }
+        } else {
+          // Exit fullscreen
+          if (document.exitFullscreen) {
+            document.exitFullscreen();
+          } else if (document.webkitExitFullscreen) {
+            document.webkitExitFullscreen();
+          } else if (document.mozCancelFullScreen) {
+            document.mozCancelFullScreen();
+          } else if (document.msExitFullscreen) {
+            document.msExitFullscreen();
+          }
+        }
+      }
+
+      window.addEventListener("keydown", (e) => {
+        if (e.key === "ArrowRight" && mode === "full") next();
+        if (e.key === "ArrowLeft" && mode === "full") prev();
+        if (e.key.toLowerCase() === "m") toggleMode();
+        if (e.key.toLowerCase() === "f") toggleFullscreen();
+      });
+
+      const pad = (n) => String(n).padStart(2, "0");
+      function updateClock() {
+        const d = new Date();
+        els.timestamp.textContent = `${d.getFullYear()}-${pad(
+          d.getMonth() + 1
+        )}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(
+          d.getMinutes()
+        )}:${pad(d.getSeconds())}`;
+      }
+      updateClock();
+      setInterval(updateClock, 1000);
+
+      function applyMode() {
+        const c = els.layout.classList;
+        c.toggle("full", mode === "full");
+        c.toggle("list", mode === "list");
+        // Update icon: show list icon (☰) when in full mode, fullscreen image when in list mode
+        if (mode === "full") {
+          els.toggleIcon.innerHTML =
+            '<img src="./assets/exit_full-screen.png" alt="Fullscreen-exit">';
+        } else {
+          els.toggleIcon.innerHTML =
+            '<img src="./assets/enter_full-screen.png" alt="Fullscreen">';
+        }
+        els.toggleView.title =
+          mode === "full"
+            ? "Press M to switch to list view"
+            : "Press M to switch to fullscreen view";
+        localStorage.setItem("camMode", mode);
+      }
+      function toggleMode() {
+        mode = mode === "full" ? "list" : "full";
+        applyMode();
+      }
+      els.toggleView.addEventListener("click", toggleMode);
+
+      buildList();
+      applyMode();
+      render(current);
+    </script>
+  </body>
+</html>
