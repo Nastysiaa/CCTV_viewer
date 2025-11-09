@@ -191,6 +191,55 @@
       .layout.full .main {
         width: 100%;
       }
+      .layout.full .player {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 0;
+        padding: 0;
+        align-items: stretch;
+        overflow: auto;
+      }
+      .layout.full .player-content {
+        padding-top: 0;
+      }
+      .cam-grid-item {
+        position: relative;
+        border: none;
+        background: #000;
+        overflow: hidden;
+        aspect-ratio: 16 / 9;
+        min-height: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0;
+        padding: 0;
+      }
+      .cam-grid-item video,
+      .cam-grid-item img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        display: block;
+        filter: grayscale(100%);
+      }
+      .cam-grid-item .cam-label {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        padding: 4px 8px;
+        background: rgba(0, 0, 0, 0.65);
+        color: #fff;
+        font-family: var(--mono);
+        font-size: 11px;
+        letter-spacing: 0.2px;
+        pointer-events: none;
+        user-select: none;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
 
       .layout.list .grid {
         flex-direction: row;
@@ -202,6 +251,11 @@
         min-width: 0;
         display: flex;
         flex-direction: column;
+      }
+      .layout.list .player {
+        display: flex;
+        align-items: stretch;
+        justify-content: stretch;
       }
       .layout.list .sidebar {
         display: flex;
@@ -382,10 +436,6 @@
           url: "http://194.116.34.4:80/mjpg/video.mjpg",
         },
         {
-          title: "Novokuznetsk, Russia",
-          url: "http://46.181.60.194:8080/webcapture.jpg?command=snap&channel=1?COUNTER",
-        },
-        {
           title: "Fryazino, Russia",
           url: "http://193.9.244.207:8084/webcapture.jpg?command=snap&channel=1?COUNTER",
         },
@@ -529,6 +579,8 @@
       let current = 0,
         hls = null,
         pollTimer = null;
+      const gridHlsInstances = new Map();
+      const gridPollTimers = new Map();
 
       function inferType(u) {
         const url = (u || "").toLowerCase();
@@ -566,6 +618,19 @@
           hls = null;
         }
         els.playerContent.innerHTML = "";
+      }
+      function cleanupGrid() {
+        // Cleanup all grid streams
+        gridHlsInstances.forEach((instance) => {
+          try {
+            instance.destroy();
+          } catch (_) {}
+        });
+        gridHlsInstances.clear();
+        gridPollTimers.forEach((timer) => {
+          clearInterval(timer);
+        });
+        gridPollTimers.clear();
       }
       async function ensurePlay(v) {
         try {
@@ -609,43 +674,47 @@
         return t || "—";
       }
 
-      function render(i) {
-        const cam = cameras[i];
-        if (!cam) return;
-        cleanup();
-
-        const type = inferType(cam.url);
+      function renderCamera(cam, container, index, isGrid = false) {
+        const type = cam.type || inferType(cam.url);
         const loc = extractLocation(cam.title || "");
-        els.locBadge.textContent = loc; // inside frame (left side, mirroring timestamp)
 
         if (type === "hls") {
           const v = document.createElement("video");
-          v.controls = true;
           v.muted = true;
           v.playsInline = true;
           v.autoplay = true;
-          els.playerContent.appendChild(v);
+          v.controls = !isGrid;
+          container.appendChild(v);
           if (Hls.isSupported()) {
-            hls = new Hls({ enableWorker: true });
-            hls.loadSource(cam.url);
-            hls.attachMedia(v);
-            hls.on(Hls.Events.MANIFEST_PARSED, () => ensurePlay(v));
-            hls.on(Hls.Events.ERROR, () => showError("Stream error (HLS)."));
+            const hlsInstance = new Hls({ enableWorker: true });
+            hlsInstance.loadSource(cam.url);
+            hlsInstance.attachMedia(v);
+            hlsInstance.on(Hls.Events.MANIFEST_PARSED, () => ensurePlay(v));
+            hlsInstance.on(Hls.Events.ERROR, () => {
+              if (!isGrid) showError("Stream error (HLS).");
+            });
+            if (isGrid) {
+              gridHlsInstances.set(index, hlsInstance);
+            } else {
+              hls = hlsInstance;
+            }
           } else if (v.canPlayType("application/vnd.apple.mpegurl")) {
             v.src = cam.url;
             v.addEventListener("loadedmetadata", () => ensurePlay(v));
           } else {
-            showError("HLS not supported in this browser.");
+            if (!isGrid) showError("HLS not supported in this browser.");
           }
         } else if (type === "mp4") {
           const v = document.createElement("video");
           v.src = cam.url;
-          v.controls = true;
+          v.controls = !isGrid;
           v.muted = true;
           v.playsInline = true;
           v.autoplay = true;
-          els.playerContent.appendChild(v);
-          v.addEventListener("error", () => showError("Could not play MP4."));
+          container.appendChild(v);
+          v.addEventListener("error", () => {
+            if (!isGrid) showError("Could not play MP4.");
+          });
           ensurePlay(v);
         } else if (type === "jpeg_poll") {
           const img = document.createElement("img");
@@ -655,31 +724,71 @@
             img.src =
               base + (base.includes("?") ? "&" : "?") + "t=" + Date.now();
           };
-          els.playerContent.appendChild(img);
-          img.addEventListener("error", () =>
-            showError("Snapshot not reachable.")
-          );
+          container.appendChild(img);
+          img.addEventListener("error", () => {
+            if (!isGrid) showError("Snapshot not reachable.");
+          });
           tick();
-          pollTimer = setInterval(tick, refresh);
+          const timer = setInterval(tick, refresh);
+          if (isGrid) {
+            gridPollTimers.set(index, timer);
+          } else {
+            pollTimer = timer;
+          }
         } else {
           const img = document.createElement("img");
           img.src = cam.url;
           img.alt = "MJPEG";
+          container.appendChild(img);
           img.addEventListener("error", () => {
-            showError("MJPEG failed — trying snapshot mode…");
-            cleanup();
-            const guess = cam.url.replace(
-              /faststream\.jpg.*$/i,
-              "axis-cgi/jpg/image.cgi"
-            );
-            cameras[i] = { title: cam.title, url: guess };
-            render(i);
+            if (!isGrid) {
+              showError("MJPEG failed — trying snapshot mode…");
+              cleanup();
+              const guess = cam.url.replace(
+                /faststream\.jpg.*$/i,
+                "axis-cgi/jpg/image.cgi"
+              );
+              cameras[index] = { title: cam.title, url: guess };
+              render(index);
+            }
           });
-          els.playerContent.appendChild(img);
         }
+
+        if (isGrid) {
+          const label = document.createElement("div");
+          label.className = "cam-label";
+          label.textContent = loc || cam.title || `cam_${String(index + 1).padStart(2, "0")}`;
+          container.appendChild(label);
+        }
+      }
+
+      function render(i) {
+        const cam = cameras[i];
+        if (!cam || mode !== "list") return;
+        cleanup();
+
+        const type = inferType(cam.url);
+        const loc = extractLocation(cam.title || "");
+        els.locBadge.textContent = loc;
+
+        renderCamera(cam, els.playerContent, i, false);
 
         document.querySelectorAll(".cam-item").forEach((el, idx) => {
           el.classList.toggle("active", idx === current);
+        });
+      }
+
+      function renderGrid() {
+        if (mode !== "full") return;
+        cleanupGrid();
+        cleanup(); // Cleanup single camera view
+        els.player.innerHTML = "";
+
+        cameras.forEach((cam, idx) => {
+          const gridItem = document.createElement("div");
+          gridItem.className = "cam-grid-item";
+          els.player.appendChild(gridItem);
+          renderCamera(cam, gridItem, idx, true);
         });
       }
 
@@ -739,20 +848,22 @@
       }
 
       window.addEventListener("keydown", (e) => {
-        if (e.key === "ArrowRight" && mode === "full") next();
-        if (e.key === "ArrowLeft" && mode === "full") prev();
+        if (e.key === "ArrowRight" && mode === "list") next();
+        if (e.key === "ArrowLeft" && mode === "list") prev();
         if (e.key.toLowerCase() === "m") toggleMode();
         if (e.key.toLowerCase() === "f") toggleFullscreen();
       });
 
       const pad = (n) => String(n).padStart(2, "0");
       function updateClock() {
-        const d = new Date();
-        els.timestamp.textContent = `${d.getFullYear()}-${pad(
-          d.getMonth() + 1
-        )}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(
-          d.getMinutes()
-        )}:${pad(d.getSeconds())}`;
+        if (mode === "list" && els.timestamp) {
+          const d = new Date();
+          els.timestamp.textContent = `${d.getFullYear()}-${pad(
+            d.getMonth() + 1
+          )}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(
+            d.getMinutes()
+          )}:${pad(d.getSeconds())}`;
+        }
       }
       updateClock();
       setInterval(updateClock, 1000);
@@ -774,6 +885,27 @@
             ? "Press M to switch to list view"
             : "Press M to switch to fullscreen view";
         localStorage.setItem("camMode", mode);
+
+        // Render based on mode
+        if (mode === "full") {
+          renderGrid();
+          els.timestamp.style.display = "none";
+          els.locBadge.style.display = "none";
+        } else {
+          cleanupGrid();
+          els.player.innerHTML = `
+            <div id="playerContent" class="player-content" style="padding-top: var(--topbar-height)"></div>
+            <div id="timestamp" class="badge timestamp">—</div>
+            <div id="locBadge" class="badge loc-inframe">—</div>
+          `;
+          // Re-get playerContent reference
+          els.playerContent = document.getElementById("playerContent");
+          els.timestamp = document.getElementById("timestamp");
+          els.locBadge = document.getElementById("locBadge");
+          els.timestamp.style.display = "block";
+          els.locBadge.style.display = "block";
+          render(current);
+        }
       }
       function toggleMode() {
         mode = mode === "full" ? "list" : "full";
@@ -783,7 +915,6 @@
 
       buildList();
       applyMode();
-      render(current);
     </script>
   </body>
 </html>
