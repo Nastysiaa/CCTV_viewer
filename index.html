@@ -82,7 +82,8 @@
       .layout.full .main{ width:100%; }
       .layout.full .player{
         display:grid;
-        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        justify-items: stretch;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
         gap:0; padding:0; align-items:stretch; overflow:auto;
       }
       .layout.full .player-content{ padding-top:0; }
@@ -297,7 +298,17 @@
           "title": "Live camera in NEWPORT, United Kingdom",
           "url": "http://81.140.29.28:85/cgi-bin/camera?resolution=640&amp;quality=1&amp;Language=0&amp;COUNTER",
           "type": "mjpeg"
-        }
+        },
+        { "title": "Sofia, Bulgaria", "url": "http://84.242.183.26:8081/cgi-bin/faststream.jpg?stream=half&fps=15&rand=COUNTER", "type": "jpeg_poll" },
+        { "title": "Kyustendil, Bulgaria", "url": "http://84.252.40.201:80/nph-jpeg.cgi?0", "type": "mjpeg" },
+        { "title": "Ruse, Bulgaria", "url": "http://89.35.88.16:8001/cgi-bin/camera?resolution=640&quality=1&Language=0&COUNTER", "type": "mjpeg" },
+        { "title": "Sofia, Bulgaria", "url": "http://92.247.13.209:80/mjpg/video.mjpg", "type": "mjpeg" },
+        { "title": "Novi Pazar, Serbia", "url": "http://93.87.72.254:8082/mjpg/video.mjpg", "type": "mjpeg" },
+        { "title": "Novi Pazar, Serbia", "url": "http://93.87.72.254:8090/mjpg/video.mjpg", "type": "mjpeg" },
+        { "title": "Novi Pazar, Serbia", "url": "http://93.87.72.254:8081/mjpg/video.mjpg", "type": "mjpeg" },
+        { "title": "Bucharest, Romania", "url": "http://92.85.14.184:83/onvif/snapshot/1/11", "type": "jpeg_poll" },
+        { "title": "Saint Petersburg, Russia", "url": "http://95.161.27.6:80/mjpg/video.mjpg", "type": "mjpeg" },
+        { "title": "Severomorsk, Russia", "url": "http://78.36.19.87:80/mjpg/video.mjpg", "type": "mjpeg" }
       ];
 
       const disabledIdx = new Set([0, 16, 17, 18, 19, 20]); // cam_01 and cam_17..cam_21
