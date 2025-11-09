@@ -1,122 +1,107 @@
 [
   {
-    "title": "Bern, Switzerland",
-    "url": "http://85.4.116.213:80/jpgmulreq/1/image.jpg?key=1516975535684&lq=1&COUNTER",
+    "title": "Live camera Axis in Sint-Niklaas, Belgium",
+    "url": "http://81.247.199.120:8060/mjpg/video.mjpg",
+    "type": "mjpeg"
+  },
+  {
+    "title": "Live camera Vivotek in Gent, Belgium",
+    "url": "http://81.82.251.41:8082/cgi-bin/viewer/video.jpg?r=COUNTER",
     "type": "jpeg_poll"
   },
   {
-    "title": "Live camera Axis in Lausanne, Switzerland",
-    "url": "http://213.202.40.157:80/mjpg/video.mjpg",
-    "type": "mjpeg"
-  },
-  {
-    "title": "Live camera Axis in Zurich, Switzerland",
-    "url": "http://46.14.145.154:80/mjpg/video.mjpg",
-    "type": "mjpeg"
-  },
-  {
-    "title": "Live camera Axis in Zurich, Switzerland",
-    "url": "http://83.150.56.16:83/mjpg/video.mjpg",
-    "type": "mjpeg"
-  },
-  {
-    "title": "Live camera Axis in Zurich, Switzerland",
-    "url": "http://83.150.56.16:81/mjpg/video.mjpg",
-    "type": "mjpeg"
-  },
-  {
-    "title": "Live camera Axis in Zurich, Switzerland",
-    "url": "http://83.150.56.16:82/mjpg/video.mjpg",
-    "type": "mjpeg"
-  },
-  {
-    "title": "Live camera Mobotix in Bern, Switzerland",
-    "url": "http://46.14.234.221:81/cgi-bin/faststream.jpg?stream=half&fps=15&rand=COUNTER",
+    "title": "Live camera Hi3516 in Hasselt, Belgium",
+    "url": "http://94.110.74.26:80/webcapture.jpg?command=snap&channel=1?COUNTER",
     "type": "jpeg_poll"
   },
   {
-    "title": "Live camera Axis in Zurich, Switzerland",
-    "url": "http://46.14.231.181:8888/mjpg/video.mjpg",
-    "type": "mjpeg"
-  },
-  {
-    "title": "Live camera Mobotix in Lausanne, Switzerland",
-    "url": "http://46.14.203.136:8080/cgi-bin/faststream.jpg?stream=half&fps=15&rand=COUNTER",
+    "title": "Live camera Mobotix in Ternat, Belgium",
+    "url": "http://81.82.193.10:8080/cgi-bin/faststream.jpg?stream=half&fps=15&rand=COUNTER",
     "type": "jpeg_poll"
   },
   {
-    "title": "Live camera Mobotix in Bellinzona, Switzerland",
-    "url": "http://217.11.41.46:80/cgi-bin/faststream.jpg?stream=half&fps=15&rand=COUNTER",
+    "title": "Live camera Axis in Brussels, Belgium",
+    "url": "http://193.190.230.96:80/mjpg/video.mjpg",
+    "type": "mjpeg"
+  },
+  {
+    "title": "Live camera Megapixel in Southampton, United Kingdom",
+    "url": "http://81.174.159.250:8080/jpgmulreq/1/image.jpg?key=1516975535684&lq=1&COUNTER",
     "type": "jpeg_poll"
   },
   {
-    "title": "Live camera Axis in Pully, Switzerland",
-    "url": "http://212.147.38.3:80/mjpg/video.mjpg",
-    "type": "mjpeg"
-  },
-  {
-    "title": "Live camera Axis in Moutier, Switzerland",
-    "url": "http://213.3.31.226:9003/mjpg/video.mjpg",
-    "type": "mjpeg"
-  },
-  {
-    "title": "Live camera Mobotix in Buchs, Switzerland",
-    "url": "http://217.67.130.29:8080/cgi-bin/faststream.jpg?stream=half&fps=15&rand=COUNTER",
+    "title": "Live camera Megapixel in Cranfield, United Kingdom",
+    "url": "http://5.226.58.5:9001/jpgmulreq/1/image.jpg?key=1516975535684&lq=1&COUNTER",
     "type": "jpeg_poll"
   },
   {
-    "title": "Live camera Mobotix in La Chaux-de-Fonds, Switzerland",
-    "url": "http://80.83.62.89:80/cgi-bin/faststream.jpg?stream=half&fps=15&rand=COUNTER",
+    "title": "Live camera Megapixel in Cranfield, United Kingdom",
+    "url": "http://5.226.58.4:9003/jpgmulreq/1/image.jpg?key=1516975535684&lq=1&COUNTER",
     "type": "jpeg_poll"
   },
   {
-    "title": "Live camera Axis in Lugano, Switzerland",
-    "url": "http://213.200.230.69:80/mjpg/video.mjpg",
-    "type": "mjpeg"
-  },
-  {
-    "title": "Live camera Mobotix in Aesch, Switzerland",
-    "url": "http://62.2.92.234:80/cgi-bin/faststream.jpg?stream=half&fps=15&rand=COUNTER",
+    "title": "Live camera Megapixel in Swansea, United Kingdom",
+    "url": "http://90.199.115.205:80/jpgmulreq/1/image.jpg?key=1516975535684&lq=1&COUNTER",
     "type": "jpeg_poll"
   },
   {
-    "title": "Live camera Mobotix in Neuchatel, Switzerland",
-    "url": "http://213.193.106.62:8080/cgi-bin/faststream.jpg?stream=half&fps=15&rand=COUNTER",
+    "title": "Live camera Megapixel in London, United Kingdom",
+    "url": "http://185.254.139.226:8060/jpgmulreq/1/image.jpg?key=1516975535684&lq=1&COUNTER",
     "type": "jpeg_poll"
   },
   {
-    "title": "Live camera Mobotix in Turgi, Switzerland",
-    "url": "http://81.221.120.131:82/cgi-bin/faststream.jpg?stream=half&fps=15&rand=COUNTER",
+    "title": "Live camera Megapixel in Cranfield, United Kingdom",
+    "url": "http://91.102.60.75:9001/jpgmulreq/1/image.jpg?key=1516975535684&lq=1&COUNTER",
     "type": "jpeg_poll"
   },
   {
-    "title": "Live camera Axis in Zurich, Switzerland",
-    "url": "http://151.127.6.169:8081/mjpg/video.mjpg",
+    "title": "Live camera Axis in London, United Kingdom",
+    "url": "http://217.36.68.34:80/mjpg/video.mjpg",
     "type": "mjpeg"
   },
   {
-    "title": "Live camera Axis in Zurich, Switzerland",
-    "url": "http://151.127.6.169:8082/mjpg/video.mjpg",
+    "title": "Live camera in Brussels, Belgium",
+    "url": "http://109.134.66.46:82/cgi-bin/camera?resolution=640&amp;quality=1&amp;Language=0&amp;COUNTER",
     "type": "mjpeg"
   },
   {
-    "title": "Live camera Axis in Vevey, Switzerland",
-    "url": "http://83.173.213.86:8081/mjpg/video.mjpg",
+    "title": "Live camera in Brussels, Belgium",
+    "url": "http://109.134.66.46:81/cgi-bin/camera?resolution=640&amp;quality=1&amp;Language=0&amp;COUNTER",
     "type": "mjpeg"
   },
   {
-    "title": "Live camera in Bubikon, Switzerland",
-    "url": "http://46.14.251.37:2000/oneshotimage1?COUNTER",
+    "title": "Live camera in Mechelen, Belgium",
+    "url": "http://81.83.82.38:8080/?action=stream",
     "type": "mjpeg"
   },
   {
-    "title": "Live camera in Zurich, Switzerland",
-    "url": "http://213.144.145.239:8090/cam_1.cgi",
+    "title": "Live camera in Ternat, Belgium",
+    "url": "http://81.82.193.69:10001/cgi-bin/camera?resolution=640&amp;quality=1&amp;Language=0&amp;COUNTER",
     "type": "mjpeg"
   },
   {
-    "title": "Live camera in Chippis, Switzerland",
-    "url": "http://213.221.146.11:8080/oneshotimage1?COUNTER",
+    "title": "Live camera in NEWPORT, United Kingdom",
+    "url": "http://81.140.29.28:81/cgi-bin/camera?resolution=640&amp;quality=1&amp;Language=0&amp;COUNTER",
+    "type": "mjpeg"
+  },
+  {
+    "title": "Live camera in NEWPORT, United Kingdom",
+    "url": "http://81.140.29.28:82/cgi-bin/camera?resolution=640&amp;quality=1&amp;Language=0&amp;COUNTER",
+    "type": "mjpeg"
+  },
+  {
+    "title": "Live camera in NEWPORT, United Kingdom",
+    "url": "http://81.140.29.28:84/cgi-bin/camera?resolution=640&amp;quality=1&amp;Language=0&amp;COUNTER",
+    "type": "mjpeg"
+  },
+  {
+    "title": "Live camera in NEWPORT, United Kingdom",
+    "url": "http://81.140.29.28:83/cgi-bin/camera?resolution=640&amp;quality=1&amp;Language=0&amp;COUNTER",
+    "type": "mjpeg"
+  },
+  {
+    "title": "Live camera in NEWPORT, United Kingdom",
+    "url": "http://81.140.29.28:85/cgi-bin/camera?resolution=640&amp;quality=1&amp;Language=0&amp;COUNTER",
     "type": "mjpeg"
   }
 ]
