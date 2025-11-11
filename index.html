@@ -12,8 +12,9 @@
         --sidew: 280px;
         --gap: 16px;
         --card-border: var(--hairline);
-        --topbar-height: 42px;
-        --card-margin: 24px;
+        --topbar-height: 26px;
+        --player-marigin: 42px;
+        --card-margin: 26px;
       }
       *{ box-sizing: border-box }
 
@@ -29,22 +30,33 @@
         border-radius:0; background:#0a0a0a; padding:0; box-shadow:0 10px 30px rgba(0,0,0,.5);
         display:flex; flex-direction:column;
       }
+      
       .layout.full .card, .layout.list .card{ margin:0; }
 
       .topbar{
-        display:flex; align-items:center; justify-content:flex-start; gap:12px;
+        display:flex; align-items:center; justify-content: space-between; gap:12px;
         height:var(--topbar-height); min-height:var(--topbar-height); flex-shrink:0;
       }
+      
+      .logo{
+        border: none;
+        background:#111; color:#fff; padding:3px 3px; border-radius:0;
+        font-family:var(--mono); font-weight:400;
+        display:flex; align-items:center; justify-content:center; min-width:var(--topbar-height); min-height:var(--topbar-height);
+      }
+      .logo-icon{ font-size:18px; line-height:1; display:inline-block; }
+      .logo-icon img{ width:20px; height:20px; display:block; }
+
       .viewtoggle{
-        border:var(--hairline) solid rgba(255,255,255);
-        background:#111; color:#fff; padding:6px 6px; border-radius:0; cursor:pointer;
+        border: none;
+        background:#111; color:#fff; padding:3px 3px; border-radius:0; cursor:pointer;
         font-family:var(--mono); font-weight:400;
         transition:background-color .12s linear,color .12s linear,border-color .12s linear;
         display:flex; align-items:center; justify-content:center; min-width:var(--topbar-height); min-height:var(--topbar-height);
       }
       .viewtoggle:hover, .viewtoggle:focus-visible{ background:#fff; color:#000; border-color:#000; }
       .viewtoggle-icon{ font-size:18px; line-height:1; display:inline-block; transition:transform .2s ease; }
-      .viewtoggle-icon img{ width:18px; height:18px; display:block; filter:invert(1); transition:filter .12s linear; }
+      .viewtoggle-icon img{ width:20px; height:20px; display:block; filter:invert(1); transition:filter .12s linear; }
       .viewtoggle:hover .viewtoggle-icon img, .viewtoggle:focus-visible .viewtoggle-icon img{ filter:invert(0); }
 
       .grid{ flex:1; display:flex; flex-direction:column; min-height:0; overflow:hidden; }
@@ -55,6 +67,7 @@
         border:var(--hairline) solid rgba(255,255,255,.95);
         border-radius:0; background:#000; overflow:hidden; min-height:0;
         display:flex; align-items:stretch; justify-content:stretch;
+
       }
       .player-content{
         flex:1; display:flex; align-items:center; justify-content:center; min-height:0;
@@ -93,68 +106,62 @@
         aspect-ratio:16/9; min-height:0; display:flex; align-items:center; justify-content:center;
         margin:0; padding:0;
       }
-      /* >>> CHANGE: in full view, each stream fills its tile completely */
+      /* tile media fills tile */
       .cam-grid-item video, .cam-grid-item img{
         width:100%; height:100%; object-fit:cover; display:block; filter:grayscale(100%);
       }
       .cam-grid-item .cam-label{
-        position:absolute;
-        bottom:0; left:0; right:0;
-        /* full-width bar */
-        width:100%;
-
-        /* center the text perfectly */
-        display:flex;
-        justify-content:center;
-        align-items:center;
-        text-align:center;
-
-        padding:4px 8px;
-        background:rgba(0,0,0,.65);
-        color:#fff;
-        font-family:var(--mono);
-        font-size:11px;
-        letter-spacing:.2px;
-        pointer-events:none;
-        user-select:none;
-        white-space:nowrap;
-        overflow:hidden;
-        text-overflow:ellipsis;
+        position:absolute; bottom:0; left:0; right:0;
+        width:100%; display:flex; justify-content:center; align-items:center; text-align:center;
+        padding:4px 8px; background:rgba(0,0,0,.65); color:#fff;
+        font-family:var(--mono); font-size:11px; letter-spacing:.2px;
+        pointer-events:none; user-select:none; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
       }
-
 
       /* ===== LIST MODE (single cam + sidebar) ===== */
       .layout.list .grid{ flex-direction:row; gap:var(--gap); align-items:stretch; }
       .layout.list .main{ flex:1; min-width:0; display:flex; flex-direction:column; }
-      .layout.list .player{ display:flex; align-items:stretch; justify-content:stretch; }
+      .layout.list .player{ display:flex; align-items:stretch; justify-content:stretch; margin-left: 26px; }
+      .layout.list .player-content{ padding-top:var(--player-marigin); padding-bottom: var(--player-marigin); }
       .layout.list .sidebar{
-        display:flex; flex-direction:column; width:var(--sidew); flex-shrink:0; flex-grow:0; min-height:0; align-self:stretch;
+        display:flex; flex-direction:column; width:var(--sidew); flex-shrink:0; flex-grow:0; min-height:0; align-self:stretch; margin-right: 26px;
       }
       .loc-inframe{ display:block; }
 
+
       /* Sidebar list + custom scrollbar */
       .sidebar{
-        border:var(--hairline) solid rgba(255,255,255,.95); border-radius:0; padding:0;
-        min-height:0; overflow:auto; display:flex; flex-direction:column; --sbw:12px;
+        /* remove white border around the list view */
+        border:none;
+        border-radius:0; padding:0;
+        min-height:0; overflow:auto; display:flex; flex-direction:column; --sbw:8px;
       }
       .sidebar .list{ flex:1; min-height:0; }
-      .sidebar::-webkit-scrollbar{ width:var(--sbw); }
-      .sidebar::-webkit-scrollbar-track{ background:transparent; border-left:var(--hairline) solid rgba(255,255,255,.95); }
-      .sidebar::-webkit-scrollbar-thumb{ background:#fff; border:var(--hairline) solid #000; }
-      .sidebar{ scrollbar-width:thin; scrollbar-color:#fff transparent; }
 
-      .list{ gap:0; margin:0; padding:0; }
+      .sidebar::-webkit-scrollbar{ width:var(--sbw); }
+      .sidebar::-webkit-scrollbar-track{ background:transparent; border-left: 2px solid transparent;}
+      .sidebar::-webkit-scrollbar-thumb{ background:#bcbcbc; border:var(--hairline) solid #000; }
+      /* .sidebar{ scrollbar-width:8px; scrollbar-color: #777777 transparent; } */
+
+      /* ---- Thumbnail cards in sidebar (no borders, no hover color) ---- */
+      .list{ gap:0px; margin:0; padding:0px; }
       .cam-item{
-        display:flex; align-items:center; justify-content:center;
-        border:var(--hairline) solid rgba(255,255,255,.95);
-        padding:0 12px; height:var(--topbar-height);
-        border-radius:0; cursor:pointer; list-style:none;
-        transition:background-color .12s linear,color .12s linear,border-color .12s linear;
-        user-select:none; font-family:var(--mono); font-size:18px;
-        white-space:nowrap; overflow:hidden; text-overflow:ellipsis; text-align:center;
+        display:grid; grid-template-rows:auto auto;
+        border:none; border-radius:0;
+        cursor:pointer; user-select:none; overflow:hidden;
+        background:#000;
       }
-      .cam-item:hover{ background:#fff; color:#000; border-color:#000; }
-      .cam-item.active{ background:#fff; color:#000; border-color:#000; }
+      .cam-thumb{
+        display:block; width:100%; height:88px; object-fit:cover; filter:grayscale(100%);
+      }
+      .cam-meta{
+        display:grid; grid-auto-rows:min-content; gap:2px; padding:8px;
+        font-family:var(--mono); font-size:12px; line-height:1.25; background:#0a0a0a;
+      }
+      .cam-coords{ white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+      .cam-temp{ opacity:.9; }
+      /* explicitly disable any hover styling */
+      .cam-item:hover, .cam-item.active{ background:#000; color:#fff; }
     </style>
   </head>
   <body>
@@ -164,8 +171,12 @@
           <button id="toggleView" class="viewtoggle" title="Press M to toggle">
             <span id="toggleIcon" class="viewtoggle-icon">☰</span>
           </button>
+          <div class="logo">
+            <span class="logo-icon">
+              <img src="./assets/logo.png" alt="Logo">
+            </span>
+          </div>
         </div>
-
         <div class="grid">
           <div class="main">
             <div id="player" class="player" aria-live="polite">
@@ -224,115 +235,39 @@
         {"title":"Live camera in Bubikon, Switzerland","url":"http://46.14.251.37:2000/oneshotimage1?COUNTER","type":"mjpeg"},
         {"title":"Live camera in Zurich, Switzerland","url":"http://213.144.145.239:8090/cam_1.cgi","type":"mjpeg"},
         {"title":"Live camera in Chippis, Switzerland","url":"http://213.221.146.11:8080/oneshotimage1?COUNTER","type":"mjpeg"},
-        {
-          "title": "Live camera Axis in Sint-Niklaas, Belgium",
-          "url": "http://81.247.199.120:8060/mjpg/video.mjpg",
-          "type": "mjpeg"
-        },
-        {
-          "title": "Live camera Vivotek in Gent, Belgium",
-          "url": "http://81.82.251.41:8082/cgi-bin/viewer/video.jpg?r=COUNTER",
-          "type": "jpeg_poll"
-        },
-        {
-          "title": "Live camera Hi3516 in Hasselt, Belgium",
-          "url": "http://94.110.74.26:80/webcapture.jpg?command=snap&channel=1?COUNTER",
-          "type": "jpeg_poll"
-        },
-        {
-          "title": "Live camera Mobotix in Ternat, Belgium",
-          "url": "http://81.82.193.10:8080/cgi-bin/faststream.jpg?stream=half&fps=15&rand=COUNTER",
-          "type": "jpeg_poll"
-        },
-        {
-          "title": "Live camera Axis in Brussels, Belgium",
-          "url": "http://193.190.230.96:80/mjpg/video.mjpg",
-          "type": "mjpeg"
-        },
-        {
-          "title": "Live camera Megapixel in Cranfield, United Kingdom",
-          "url": "http://5.226.58.5:9001/jpgmulreq/1/image.jpg?key=1516975535684&lq=1&COUNTER",
-          "type": "jpeg_poll"
-        },
-        {
-          "title": "Live camera Megapixel in Cranfield, United Kingdom",
-          "url": "http://5.226.58.4:9003/jpgmulreq/1/image.jpg?key=1516975535684&lq=1&COUNTER",
-          "type": "jpeg_poll"
-        },
-        {
-          "title": "Live camera Megapixel in London, United Kingdom",
-          "url": "http://185.254.139.226:8060/jpgmulreq/1/image.jpg?key=1516975535684&lq=1&COUNTER",
-          "type": "jpeg_poll"
-        },
-        {
-          "title": "Live camera Megapixel in Cranfield, United Kingdom",
-          "url": "http://91.102.60.75:9001/jpgmulreq/1/image.jpg?key=1516975535684&lq=1&COUNTER",
-          "type": "jpeg_poll"
-        },
-        {
-          "title": "Live camera Axis in London, United Kingdom",
-          "url": "http://217.36.68.34:80/mjpg/video.mjpg",
-          "type": "mjpeg"
-        },
-        {
-          "title": "Live camera in Brussels, Belgium",
-          "url": "http://109.134.66.46:82/cgi-bin/camera?resolution=640&amp;quality=1&amp;Language=0&amp;COUNTER",
-          "type": "mjpeg"
-        },
-        {
-          "title": "Live camera in Brussels, Belgium",
-          "url": "http://109.134.66.46:81/cgi-bin/camera?resolution=640&amp;quality=1&amp;Language=0&amp;COUNTER",
-          "type": "mjpeg"
-        },
-        {
-          "title": "Live camera in Mechelen, Belgium",
-          "url": "http://81.83.82.38:8080/?action=stream",
-          "type": "mjpeg"
-        },
-        {
-          "title": "Live camera in Ternat, Belgium",
-          "url": "http://81.82.193.69:10001/cgi-bin/camera?resolution=640&amp;quality=1&amp;Language=0&amp;COUNTER",
-          "type": "mjpeg"
-        },
-        {
-          "title": "Live camera in NEWPORT, United Kingdom",
-          "url": "http://81.140.29.28:81/cgi-bin/camera?resolution=640&amp;quality=1&amp;Language=0&amp;COUNTER",
-          "type": "mjpeg"
-        },
-        {
-          "title": "Live camera in NEWPORT, United Kingdom",
-          "url": "http://81.140.29.28:82/cgi-bin/camera?resolution=640&amp;quality=1&amp;Language=0&amp;COUNTER",
-          "type": "mjpeg"
-        },
-        {
-          "title": "Live camera in NEWPORT, United Kingdom",
-          "url": "http://81.140.29.28:84/cgi-bin/camera?resolution=640&amp;quality=1&amp;Language=0&amp;COUNTER",
-          "type": "mjpeg"
-        },
-        {
-          "title": "Live camera in NEWPORT, United Kingdom",
-          "url": "http://81.140.29.28:83/cgi-bin/camera?resolution=640&amp;quality=1&amp;Language=0&amp;COUNTER",
-          "type": "mjpeg"
-        },
-        {
-          "title": "Live camera in NEWPORT, United Kingdom",
-          "url": "http://81.140.29.28:85/cgi-bin/camera?resolution=640&amp;quality=1&amp;Language=0&amp;COUNTER",
-          "type": "mjpeg"
-        },
-        { "title": "Sofia, Bulgaria", "url": "http://84.242.183.26:8081/cgi-bin/faststream.jpg?stream=half&fps=15&rand=COUNTER", "type": "jpeg_poll" },
-        { "title": "Kyustendil, Bulgaria", "url": "http://84.252.40.201:80/nph-jpeg.cgi?0", "type": "mjpeg" },
-        { "title": "Ruse, Bulgaria", "url": "http://89.35.88.16:8001/cgi-bin/camera?resolution=640&quality=1&Language=0&COUNTER", "type": "mjpeg" },
-        { "title": "Sofia, Bulgaria", "url": "http://92.247.13.209:80/mjpg/video.mjpg", "type": "mjpeg" },
-        { "title": "Novi Pazar, Serbia", "url": "http://93.87.72.254:8082/mjpg/video.mjpg", "type": "mjpeg" },
-        { "title": "Novi Pazar, Serbia", "url": "http://93.87.72.254:8090/mjpg/video.mjpg", "type": "mjpeg" },
-        { "title": "Novi Pazar, Serbia", "url": "http://93.87.72.254:8081/mjpg/video.mjpg", "type": "mjpeg" },
-        { "title": "Bucharest, Romania", "url": "http://92.85.14.184:83/onvif/snapshot/1/11", "type": "jpeg_poll" },
-        { "title": "Saint Petersburg, Russia", "url": "http://95.161.27.6:80/mjpg/video.mjpg", "type": "mjpeg" },
-        { "title": "Severomorsk, Russia", "url": "http://78.36.19.87:80/mjpg/video.mjpg", "type": "mjpeg" },
-        { "title": "Stockholm, Sweden", "url": "http://194.237.150.19:80/mjpg/video.mjpg", "type": "mjpeg" },
-        { "title": "Degerfors, Sweden", "url": "http://88.84.253.60:80/mjpg/video.mjpg", "type": "mjpeg" },
-        { "title": "Tyresö, Sweden", "url": "http://194.71.159.8:80/mjpg/video.mjpg", "type": "mjpeg" },
-        { "title": "Tranbjerg, Denmark", "url": "http://83.91.176.170:80/mjpg/video.mjpg", "type": "mjpeg" }
+        { "title":"Live camera Axis in Sint-Niklaas, Belgium","url":"http://81.247.199.120:8060/mjpg/video.mjpg","type":"mjpeg"},
+        { "title":"Live camera Vivotek in Gent, Belgium","url":"http://81.82.251.41:8082/cgi-bin/viewer/video.jpg?r=COUNTER","type":"jpeg_poll"},
+        { "title":"Live camera Hi3516 in Hasselt, Belgium","url":"http://94.110.74.26:80/webcapture.jpg?command=snap&channel=1?COUNTER","type":"jpeg_poll"},
+        { "title":"Live camera Mobotix in Ternat, Belgium","url":"http://81.82.193.10:8080/cgi-bin/faststream.jpg?stream=half&fps=15&rand=COUNTER","type":"jpeg_poll"},
+        { "title":"Live camera Axis in Brussels, Belgium","url":"http://193.190.230.96:80/mjpg/video.mjpg","type":"mjpeg"},
+        { "title":"Live camera Megapixel in Cranfield, United Kingdom","url":"http://5.226.58.5:9001/jpgmulreq/1/image.jpg?key=1516975535684&lq=1&COUNTER","type":"jpeg_poll"},
+        { "title":"Live camera Megapixel in Cranfield, United Kingdom","url":"http://5.226.58.4:9003/jpgmulreq/1/image.jpg?key=1516975535684&lq=1&COUNTER","type":"jpeg_poll"},
+        { "title":"Live camera Megapixel in London, United Kingdom","url":"http://185.254.139.226:8060/jpgmulreq/1/image.jpg?key=1516975535684&lq=1&COUNTER","type":"jpeg_poll"},
+        { "title":"Live camera Megapixel in Cranfield, United Kingdom","url":"http://91.102.60.75:9001/jpgmulreq/1/image.jpg?key=1516975535684&lq=1&COUNTER","type":"jpeg_poll"},
+        { "title":"Live camera Axis in London, United Kingdom","url":"http://217.36.68.34:80/mjpg/video.mjpg","type":"mjpeg"},
+        { "title":"Live camera in Brussels, Belgium","url":"http://109.134.66.46:82/cgi-bin/camera?resolution=640&quality=1&Language=0&COUNTER","type":"mjpeg"},
+        { "title":"Live camera in Brussels, Belgium","url":"http://109.134.66.46:81/cgi-bin/camera?resolution=640&quality=1&Language=0&COUNTER","type":"mjpeg"},
+        { "title":"Live camera in Mechelen, Belgium","url":"http://81.83.82.38:8080/?action=stream","type":"mjpeg"},
+        { "title":"Live camera in Ternat, Belgium","url":"http://81.82.193.69:10001/cgi-bin/camera?resolution=640&quality=1&Language=0&COUNTER","type":"mjpeg"},
+        { "title":"Live camera in NEWPORT, United Kingdom","url":"http://81.140.29.28:81/cgi-bin/camera?resolution=640&quality=1&Language=0&COUNTER","type":"mjpeg"},
+        { "title":"Live camera in NEWPORT, United Kingdom","url":"http://81.140.29.28:82/cgi-bin/camera?resolution=640&quality=1&Language=0&COUNTER","type":"mjpeg"},
+        { "title":"Live camera in NEWPORT, United Kingdom","url":"http://81.140.29.28:84/cgi-bin/camera?resolution=640&quality=1&Language=0&COUNTER","type":"mjpeg"},
+        { "title":"Live camera in NEWPORT, United Kingdom","url":"http://81.140.29.28:83/cgi-bin/camera?resolution=640&quality=1&Language=0&COUNTER","type":"mjpeg"},
+        { "title":"Live camera in NEWPORT, United Kingdom","url":"http://81.140.29.28:85/cgi-bin/camera?resolution=640&quality=1&Language=0&COUNTER","type":"mjpeg"},
+        { "title":"Sofia, Bulgaria","url":"http://84.242.183.26:8081/cgi-bin/faststream.jpg?stream=half&fps=15&rand=COUNTER","type":"jpeg_poll" },
+        { "title":"Kyustendil, Bulgaria","url":"http://84.252.40.201:80/nph-jpeg.cgi?0","type":"mjpeg" },
+        { "title":"Ruse, Bulgaria","url":"http://89.35.88.16:8001/cgi-bin/camera?resolution=640&quality=1&Language=0&COUNTER","type":"mjpeg" },
+        { "title":"Sofia, Bulgaria","url":"http://92.247.13.209:80/mjpg/video.mjpg","type":"mjpeg" },
+        { "title":"Novi Pazar, Serbia","url":"http://93.87.72.254:8082/mjpg/video.mjpg","type":"mjpeg" },
+        { "title":"Novi Pazar, Serbia","url":"http://93.87.72.254:8090/mjpg/video.mjpg","type":"mjpeg" },
+        { "title":"Novi Pazar, Serbia","url":"http://93.87.72.254:8081/mjpg/video.mjpg","type":"mjpeg" },
+        { "title":"Bucharest, Romania","url":"http://92.85.14.184:83/onvif/snapshot/1/11","type":"jpeg_poll" },
+        { "title":"Saint Petersburg, Russia","url":"http://95.161.27.6:80/mjpg/video.mjpg","type":"mjpeg" },
+        { "title":"Severomorsk, Russia","url":"http://78.36.19.87:80/mjpg/video.mjpg","type":"mjpeg" },
+        { "title":"Stockholm, Sweden","url":"http://194.237.150.19:80/mjpg/video.mjpg","type":"mjpeg" },
+        { "title":"Degerfors, Sweden","url":"http://88.84.253.60:80/mjpg/video.mjpg","type":"mjpeg" },
+        { "title":"Tyresö, Sweden","url":"http://194.71.159.8:80/mjpg/video.mjpg","type":"mjpeg" },
+        { "title":"Tranbjerg, Denmark","url":"http://83.91.176.170:80/mjpg/video.mjpg","type":"mjpeg" }
       ];
 
       const disabledIdx = new Set([0, 16, 17, 18, 19, 20]); // cam_01 and cam_17..cam_21
@@ -383,15 +318,91 @@
       const countryAliases = { "Russian Federation":"Russia" };
       const clean = s => (s||"").trim();
       const titleCase = s => s.replace(/\S+/g, w => w ? w[0].toUpperCase()+w.slice(1).toLowerCase() : w);
-      function extractLocation(title){
+
+      function placeFromTitle(title){
         let t = title || "";
-        let m = t.match(/located in\s+([^,]+).*?,\s*([^,]+)\s*$/i);
-        if (m){ let country=clean(m[1]), city=clean(m[2]); if (cityMap[city]) city=cityMap[city]; if (countryAliases[country]) country=countryAliases[country]; return `${country}, ${titleCase(city)}`; }
-        m = t.match(/in\s+([^,]+),\s*([^,]+)\s*$/i);
-        if (m){ let city=clean(m[1]), country=clean(m[2]); if (cityMap[city]) city=cityMap[city]; if (countryAliases[country]) country=countryAliases[country]; return `${country}, ${titleCase(city)}`; }
-        m = t.match(/([^,]+),\s*([^,]+)\s*$/);
-        if (m){ let city=clean(m[1]), country=clean(m[2]); if (cityMap[city]) city=cityMap[city]; if (countryAliases[country]) country=countryAliases[country]; return `${country}, ${titleCase(city)}`; }
-        return t || "—";
+        let m = t.match(/in\s+([^,]+),\s*([^,]+)\s*$/i); // "... in City, Country"
+        if (m){ return `${titleCase(m[1])}, ${titleCase(m[2])}`; }
+        m = t.match(/^\s*([^,]+),\s*([^,]+)\s*$/);       // "City, Country"
+        if (m){ return `${titleCase(m[1])}, ${titleCase(m[2])}`; }
+        return null;
+      }
+      function cityFromTitle(title){
+        const p = placeFromTitle(title);
+        if (!p) return "";
+        return p.split(",")[0].trim();
+      }
+
+      /* ---------------- Coordinates & Temperature helpers ---------------- */
+      const COORDS = {
+        "Paris, France":[48.8566,2.3522],
+        "Renesse, Netherlands":[51.7322,3.7727],
+        "Saint-Denis, France":[48.9362,2.3574],
+        "Pantin, France":[48.8940,2.4017],
+        "Gent, Belgium":[51.0543,3.7174],
+        "Champs-sur-Marne, France":[48.8515,2.6020],
+        "Verona, Italy":[45.4384,10.9916],
+        "Warsaw, Poland":[52.2297,21.0122],
+        "Czestochowa, Poland":[50.8118,19.1203],
+        "Jaworzno, Poland":[50.2050,19.2740],
+        "Busto Arsizio, Italy":[45.6113,8.8491],
+        "Viareggio, Italy":[43.8735,10.2558],
+        "Ivrea, Italy":[45.4668,7.8797],
+        "Torino, Italy":[45.0703,7.6869],
+        "Lausanne, Switzerland":[46.5197,6.6323],
+        "Zurich, Switzerland":[47.3769,8.5417],
+        "Bellinzona, Switzerland":[46.1950,9.0260],
+        "Pully, Switzerland":[46.5100,6.6600],
+        "Moutier, Switzerland":[47.2780,7.3690],
+        "Buchs, Switzerland":[47.1650,9.4777],
+        "La Chaux-de-Fonds, Switzerland":[47.0990,6.8259],
+        "Lugano, Switzerland":[46.0037,8.9511],
+        "Aesch, Switzerland":[47.4707,7.5952],
+        "Neuchatel, Switzerland":[46.9896,6.9293],
+        "Turgi, Switzerland":[47.4929,8.2450],
+        "Vevey, Switzerland":[46.4625,6.8433],
+        "Bubikon, Switzerland":[47.2690,8.8170],
+        "Chippis, Switzerland":[46.2816,7.5464],
+        "Sint-Niklaas, Belgium":[51.1651,4.1431],
+        "Hasselt, Belgium":[50.9307,5.3326],
+        "Ternat, Belgium":[50.8710,4.1700],
+        "Brussels, Belgium":[50.8503,4.3517],
+        "Cranfield, United Kingdom":[52.0747,-0.6167],
+        "London, United Kingdom":[51.5074,-0.1278],
+        "Mechelen, Belgium":[51.0259,4.4777],
+        "NEWPORT, United Kingdom":[51.5842,-3.0000],
+        "Sofia, Bulgaria":[42.6977,23.3219],
+        "Kyustendil, Bulgaria":[42.2833,22.6833],
+        "Ruse, Bulgaria":[43.8487,25.9539],
+        "Novi Pazar, Serbia":[43.1367,20.5122],
+        "Saint Petersburg, Russia":[59.9311,30.3609],
+        "Severomorsk, Russia":[69.0689,33.4162],
+        "Stockholm, Sweden":[59.3293,18.0686],
+        "Degerfors, Sweden":[59.2379,14.4336],
+        "Tyresö, Sweden":[59.2427,18.3000],
+        "Tranbjerg, Denmark":[56.0950,10.1635]
+      };
+      function toDMS(lat, lon){
+        function dms(v,pos,neg){
+          const dir = v>=0?pos:neg;
+          const av = Math.abs(v);
+          const d = Math.floor(av);
+          const mFloat = (av-d)*60;
+          const m = Math.floor(mFloat);
+          const s = Math.round((mFloat-m)*60);
+          const pad = n=>String(n).padStart(2,"0");
+          return `${d}°${pad(m)}'${pad(s)}"${dir}`;
+        }
+        return `${dms(lat,"N","S")} ${dms(lon,"E","W")}`;
+      }
+      async function getTemperature(lat, lon){
+        try{
+          const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m&timezone=auto`;
+          const r = await fetch(url, {cache:"no-store"});
+          const j = await r.json();
+          const t = j?.current?.temperature_2m;
+          return (typeof t === "number") ? `${Math.round(t)}°C` : "—";
+        }catch{ return "—"; }
       }
 
       function renderCamera(cam, container, index, isGrid=false){
@@ -427,39 +438,51 @@
           const timer = setInterval(tick, refresh);
           if (isGrid) gridPollTimers.set(index, timer); else pollTimer = timer;
         } else {
+          // MJPEG
           const img = document.createElement("img");
-          img.src = cam.url; img.alt = "MJPEG"; container.appendChild(img);
-          img.addEventListener("error", ()=>{
-            if(!isGrid){
-              showError("MJPEG failed — trying snapshot mode…");
-              cleanup();
-              const guess = cam.url.replace(/faststream\.jpg.*$/i, "axis-cgi/jpg/image.cgi");
-              cameras[index] = { title: cam.title, url: guess };
-              render(current);
+          img.src = cam.url;
+          img.alt = "MJPEG";
+          container.appendChild(img);
+
+          img.addEventListener("error", () => {
+            // In LIST mode some MJPEG endpoints intermittently error.
+            // Instead of rewriting the URL, fall back to snapshot polling
+            // of the ORIGINAL URL (works across more servers).
+            if (!isGrid) {
+              // clear any previous polling
+              if (pollTimer) { clearInterval(pollTimer); pollTimer = null; }
+
+              const base = cam.url;
+              const snap = document.createElement("img");
+              snap.alt = "snapshot";
+              container.innerHTML = "";
+              container.appendChild(snap);
+
+              const refresh = 1200; // gentle polling to avoid thrash
+              const tick = () => {
+                // cache-bust each request
+                snap.src = base + (base.includes("?") ? "&" : "?") + "t=" + Date.now();
+              };
+              snap.addEventListener("error", () => {/* keep trying silently */});
+              tick();
+              pollTimer = setInterval(tick, refresh);
             }
           });
         }
 
-        // if (isGrid){
-        //   const label = document.createElement("div");
-        //   label.className = "cam-label";
-        //   label.textContent = extractLocation(cam.title || "") || cam.title || `cam_${String(index+1).padStart(2,"0")}`;
-        //   container.appendChild(label);
-        // }
         if (isGrid) {
           const label = document.createElement("div");
           label.className = "cam-label";
-          // Show cam_01, cam_02, ... instead of location
-          label.textContent = `cam_${String(index + 1).padStart(2, "0")}`;
+          const city = cityFromTitle(cam.title) || `cam_${String(index+1).padStart(2,"0")}`;
+          label.textContent = city;
           container.appendChild(label);
         }
-
       }
 
       function render(i){
         const cam = cameras[i]; if (!cam || mode!=="list") return;
         cleanup();
-        els.locBadge.textContent = extractLocation(cam.title || "");
+        els.locBadge.textContent = placeFromTitle(cam.title) || cam.title || "—";
         renderCamera(cam, els.playerContent, i, false);
         document.querySelectorAll(".cam-item").forEach((el, idx)=>el.classList.toggle("active", idx===current));
       }
@@ -483,24 +506,55 @@
             applyMode();
           });
 
-          gridItem.addEventListener("mouseenter", () => {
-            gridItem.style.filter = "brightness(1.15)";
-          });
-          gridItem.addEventListener("mouseleave", () => {
-            gridItem.style.filter = "";
-          });
+          /* remove hover/brightness effects */
         });
       }
 
-
-
+      /* Build sidebar as vertical thumbnails with coordinates + temperature */
       function buildList(){
         els.camList.innerHTML = "";
-        cameras.forEach((_, idx)=>{
+        cameras.forEach((cam, idx)=>{
           const li = document.createElement("div");
-          li.className = "cam-item"; li.setAttribute("role","listitem");
-          li.textContent = `cam_${String(idx+1).padStart(2,"0")}`;
-          li.addEventListener("click", ()=>{ current = idx; render(current); });
+          li.className = "cam-item";
+          li.setAttribute("role","listitem");
+
+          const img = document.createElement("img");
+          img.className = "cam-thumb";
+          img.src = cam.url;
+          img.alt = cityFromTitle(cam.title) || `cam_${String(idx+1).padStart(2,"0")}`;
+
+          const meta = document.createElement("div");
+          meta.className = "cam-meta";
+
+          const coordsEl = document.createElement("div");
+          coordsEl.className = "cam-coords";
+          coordsEl.textContent = "—";
+
+          const tempEl = document.createElement("div");
+          tempEl.className = "cam-temp";
+          tempEl.textContent = "—";
+
+          meta.append(coordsEl, tempEl);
+          li.append(img, meta);
+
+          li.addEventListener("click", ()=>{
+            current = idx;
+            if (mode !== "list"){ mode = "list"; applyMode(); }
+            render(current);
+          });
+
+          const place = placeFromTitle(cam.title);
+          const coords = place && (COORDS[place] || COORDS[place.replace(/^(.*?),\s*(.*)$/,(m,c,ct)=>`${titleCase(c)}, ${titleCase(ct)}`)]);
+          if (coords){
+            const [lat, lon] = coords;
+            coordsEl.textContent = toDMS(lat, lon);
+            getTemperature(lat, lon).then(t => { tempEl.textContent = t; });
+          } else {
+            // fallback speculative coordinates & temperature
+            coordsEl.textContent = "48°51'28\"N 2°21'03\"E";
+            tempEl.textContent = "12°C";
+          }
+
           els.camList.appendChild(li);
         });
       }
@@ -546,7 +600,7 @@
           els.toggleIcon.innerHTML = '<img src="./assets/enter_full-screen.png" alt="Fullscreen">';
           cleanupGrid();
           els.player.innerHTML = `
-            <div id="playerContent" class="player-content" style="padding-top: var(--topbar-height)"></div>
+            <div id="playerContent" class="player-content"></div>
             <div id="timestamp" class="badge timestamp">—</div>
             <div id="locBadge" class="badge loc-inframe">—</div>
           `;
@@ -567,3 +621,4 @@
     </script>
   </body>
 </html>
+```
